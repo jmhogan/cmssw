@@ -9,6 +9,16 @@ from Configuration.Eras.Modifier_run2_nanoAOD_94XMiniAODv1_cff import run2_nanoA
 from Configuration.Eras.Modifier_run2_nanoAOD_94XMiniAODv2_cff import run2_nanoAOD_94XMiniAODv2
 from Configuration.Eras.Modifier_run2_nanoAOD_94X2016_cff import run2_nanoAOD_94X2016
 
+from PhysicsTools.SelectorUtils.tools.vid_id_tools import setupVIDSelection
+from RecoEgamma.PhotonIdentification.egmPhotonIDs_cfi import *
+from RecoEgamma.PhotonIdentification.PhotonIDValueMapProducer_cff import *
+from RecoEgamma.PhotonIdentification.PhotonMVAValueMapProducer_cfi import *
+from RecoEgamma.PhotonIdentification.PhotonRegressionValueMapProducer_cfi import *
+from RecoEgamma.EgammaIsolationAlgos.egmPhotonIsolationMiniAOD_cff import *
+egmPhotonIDSequence = cms.Sequence(cms.Task(egmPhotonIsolationMiniAODTask,photonIDValueMapProducer,photonMVAValueMapProducer,egmPhotonIDs,photonRegressionValueMapProducer))
+egmPhotonIDs.physicsObjectIDs = cms.VPSet()
+egmPhotonIDs.physicsObjectSrc = cms.InputTag('slimmedPhotons')
+
 photon_id_modules_WorkingPoints_nanoAOD = cms.PSet(
     modules = cms.vstring(
         'RecoEgamma.PhotonIdentification.Identification.cutBasedPhotonID_Fall17_94X_V1_TrueVtx_cff',

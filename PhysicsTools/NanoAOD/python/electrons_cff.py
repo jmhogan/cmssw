@@ -284,6 +284,7 @@ electronTable = cms.EDProducer("SimpleCandidateFlatTableProducer",
         mvaFall17V1noIso_WP90 = Var("userInt('mvaFall17V1noIso_WP90')",bool,doc="MVA noIso ID V1 WP90"),
         mvaFall17V1noIso_WPL = Var("userInt('mvaFall17V1noIso_WPL')",bool,doc="MVA noIso ID V1 loose WP"),
 
+        cutBased = Var("userInt('cutbasedID_veto')+userInt('cutbasedID_loose')+userInt('cutbasedID_medium')+userInt('cutbasedID_tight')",int,doc="cut-based ID Fall17 V1 (0:fail, 1:veto, 2:loose, 3:medium, 4:tight)"),
         cutBased_Fall17_V1 = Var("userInt('cutbasedID_Fall17_V1_veto')+userInt('cutbasedID_Fall17_V1_loose')+userInt('cutbasedID_Fall17_V1_medium')+userInt('cutbasedID_Fall17_V1_tight')",int,doc="cut-based ID Fall17 V1 (0:fail, 1:veto, 2:loose, 3:medium, 4:tight)"),
         vidNestedWPBitmap_Fall17_V1 = Var("userInt('VIDNestedWPBitmap')",int,doc=_bitmapVIDForEle_docstring),
         cutBased_HEEP = Var("userInt('cutbasedID_HEEP')",bool,doc="cut-based HEEP ID"),

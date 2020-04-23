@@ -1,4 +1,4 @@
-//
+//Changed for using LorentzVectors
 //
 
 /**
@@ -20,14 +20,36 @@
 #define HITFIT_RUNHITFIT_H
 
 #include <algorithm>
+/*
+#include "CopyOfHitFit/interface/Defaults_Text.h"
+#include "CopyOfHitFit/interface/LeptonTranslatorBase.h"
+#include "CopyOfHitFit/interface/JetTranslatorBase.h"
+#include "CopyOfHitFit/interface/METTranslatorBase.h"
+#include "CopyOfHitFit/interface/Fit_Result.h"
+#include "CopyOfHitFit/interface/Lepjets_Event.h"
+#include "CopyOfHitFit/interface/Top_Fit.h"
+*/
+// Changed include statements
+#include "Defaults_Text.h"
+#include "ElectronTranslatorBase.h"
+#include "MuonTranslatorBase.h"
+#include "JetTranslatorBase.h"
+#include "METTranslatorBase.h"
+#include "Fit_Result.h"
+#include "Lepjets_Event.h"
+#include "Top_Fit.h"
 
-#include "TopQuarkAnalysis/TopHitFit/interface/Defaults_Text.h"
-#include "TopQuarkAnalysis/TopHitFit/interface/LeptonTranslatorBase.h"
-#include "TopQuarkAnalysis/TopHitFit/interface/JetTranslatorBase.h"
-#include "TopQuarkAnalysis/TopHitFit/interface/METTranslatorBase.h"
-#include "TopQuarkAnalysis/TopHitFit/interface/Fit_Result.h"
-#include "TopQuarkAnalysis/TopHitFit/interface/Lepjets_Event.h"
-#include "TopQuarkAnalysis/TopHitFit/interface/Top_Fit.h"
+#include <TH2.h>
+#include <TF1.h>
+#include <TStyle.h>
+#include <TRandom.h>
+#include <TRandom3.h>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <TH3.h>
+#include <iostream>
+
 
 // Explanation about the MIN/MAX definitions:
 //
@@ -149,33 +171,34 @@ namespace hitfit{
     object class be translated into HitFit's Fourvec.
 
  */
-template <class AElectron,
-          class AMuon,
-          class AJet,
-          class AMet>
+/*template <class TLorentzVector,
+          class TLorentzVector,
+          class TLorentzVector,
+          class pair<double,double>>  //Changed-----------------------
+*/
 class RunHitFit {
 
 private:
 
     /**
-       The translator from AElectron to Lepjets_Event_Lep.
+       The translator from TLorentzVector to Lepjets_Event_Lep.
      */
-    LeptonTranslatorBase<AElectron>     _ElectronTranslator;
+    ElectronTranslatorBase    _ElectronTranslator;
 
     /**
-       The translator from AMuon to Lepjets_Event_Lep.
+       The translator from TLorentzVector to Lepjets_Event_Lep.
      */
-    LeptonTranslatorBase<AMuon>         _MuonTranslator;
+    MuonTranslatorBase         _MuonTranslator;
 
     /**
-       The translator from AJet to Lepjets_Event_Jet.
+       The translator from TLorentzVector to Lepjets_Event_Jet.
      */
-    JetTranslatorBase<AJet>             _JetTranslator;
+    JetTranslatorBase            _JetTranslator;
 
     /**
-       The translator from AMet to Fourvec.
+       The translator from pair<double,double> to Fourvec.
      */
-    METTranslatorBase<AMet>             _METTranslator;
+    METTranslatorBase           _METTranslator;
 
     /**
        The internal event.
@@ -198,7 +221,7 @@ private:
        the assumed jet type and applying the appropriate jet energy
        correction.
      */
-    std::vector<AJet>                   _jets;
+    std::vector<TLorentzVector>                   _jets;  //Changed
 
     /**
        Boolean flag which sets whether to use jet resolution
@@ -231,16 +254,16 @@ public:
     /**
        @brief Constructor.
 
-       @param el The function object to translate from AElectron to
+       @param el The function object to translate from TLorentzVector to
        Lepjets_Event_Lep.
 
-       @param mu The function object to translate from AMuon to
+       @param mu The function object to translate from TLorentzVector to
        Lepjets_Event_Lep.
 
-       @param jet The function object to translate from AJet to
+       @param jet The function object to translate from TLorentzVector to
        Lepjets_Event_Jet.
 
-       @param met The function object to translate from AMet to
+       @param met The function object to translate from pair<double,double> to
        Fourvec.
 
        @param default_file The path of ASCII text files which contains the
@@ -255,18 +278,21 @@ public:
        @param top_mass The mass to which the top quark should be constrained
        to.  A value of zero means this constraint will be removed.
      */
-    RunHitFit(const LeptonTranslatorBase<AElectron>& el,
-              const LeptonTranslatorBase<AMuon>&     mu,
-              const JetTranslatorBase<AJet>&         jet,
-              const METTranslatorBase<AMet>&         met,
-              const std::string                      default_file,
-              double                                 lepw_mass,
-              double                                 hadw_mass,
-              double                                 top_mass):
-        _ElectronTranslator(el),
-        _MuonTranslator(mu),
-        _JetTranslator(jet),
-        _METTranslator(met),
+    //Changed-----------------------------------------------------------------
+    RunHitFit(//TLorentzVector                el,
+              //TLorentzVector                mu,
+              //TLorentzVector                jet,
+              //pair<double,double>           met,
+              const std::string             default_file,
+              double                        lepw_mass,
+              double                        hadw_mass,
+              double                        top_mass):
+//Not sure I need these
+        _ElectronTranslator(),
+        _MuonTranslator(),
+        _JetTranslator(),
+        _METTranslator(),
+
         _event(0,0),
         _jetObjRes(false),
         _Top_Fit(Top_Fit_Args(Defaults_Text(default_file)),lepw_mass,hadw_mass,top_mass)
@@ -301,12 +327,17 @@ public:
        @param useObjRes Boolean parameter to indicate if the
        user would like to use the resolution embedded in the object,
        and not the resolution read when instantiating the class.
+
+       @param isElectron Integer that is 1 if Electron and 0
+       if lepton is Muon
      */
     void
-    AddLepton(const AElectron& electron,
-              bool useObjRes = false)
+    AddLepton(TLorentzVector lepton,  int isElectron, bool useObjRes = false)  //Changed-----
     {
-        _event.add_lep(_ElectronTranslator(electron,electron_label,useObjRes));
+        if(isElectron==1)
+           _event.add_lep(_ElectronTranslator(lepton,electron_label,useObjRes));
+        else
+           _event.add_lep(_MuonTranslator(lepton,muon_label,useObjRes));
         return;
     }
 
@@ -319,14 +350,13 @@ public:
        user would like to use the resolution embedded in the object,
        and not the resolution read when instantiating the class.
     */
-    void
-    AddLepton(const AMuon& muon,
-              bool useObjRes = false)
+/*    void
+    AddLepton(TLorentzVector muon, bool useObjRes = false) //Changed----------
     {
         _event.add_lep(_MuonTranslator(muon,muon_label,useObjRes));
         return;
     }
-
+*/
     /**
        @brief Add one jet into the internal event.  This function will
        do nothing if the internal event has already contained the maximally
@@ -348,8 +378,7 @@ public:
        and not the resolution read when instantiating the class.
     */
     void
-    AddJet(const AJet& jet,
-           bool useObjRes = false)
+    AddJet(TLorentzVector jet, bool useObjRes = false) //Changed------------
     {
         // Only set flag when adding the first jet
         // the additional jets then WILL be treated in the
@@ -368,11 +397,10 @@ public:
        @brief Set the missing transverse energy of the internal event.
      */
     void
-    SetMet(const AMet& met,
-           bool useObjRes = false)
+    SetMet(double metPx, double metPy, bool useObjRes = false) //Changed--------
     {
-        _event.met()    = _METTranslator(met,useObjRes);
-        _event.kt_res() = _METTranslator.KtResolution(met,useObjRes);
+        _event.met()    = _METTranslator(metPx,metPy,useObjRes);
+        _event.kt_res() = _METTranslator.KtResolution(metPx,metPy,useObjRes);
         return;
     }
 
@@ -421,12 +449,14 @@ public:
         if (_jets.size() < MIN_HITFIT_JET) {
             // For ttbar lepton+jets, a minimum of MIN_HITFIT_JETS jets
             // is required
+            std::cout <<"Not Enough Jets to Run!"<<std::endl;
             return 0;
         }
 
         if (_jets.size() > MAX_HITFIT_JET) {
             // Restrict the maximum number of jets in the fit
             // to prevent loop overflow
+            std::cout <<"Too Many Jets to Run!"<<std::endl;
             return 0;
         }
 
@@ -463,9 +493,41 @@ public:
                 // return object of Lepjets_Event_Jet with
                 // jet energy correction applied in accord with
                 // the assumed jet type (b or light).
-                for (size_t j = 0 ; j != _jets.size(); j++) {
-                    fev.add_jet(_JetTranslator(_jets[j],jet_types[j],_jetObjRes));
-                }
+                for (size_t j = 0 ; j != _jets.size(); j++) {		  
+		  fev.add_jet(_JetTranslator(_jets[j],jet_types[j],_jetObjRes));
+		}
+
+		// ----------------------------------------------------------
+		// EXAMPLE: how to cut out permutations based on kinetmatics
+		//          **COMMENT** the for loop just above to use this!
+		// ----------------------------------------------------------
+	        // float st = 0;
+		// float ptlepb = 0;
+		// float pthadb = 0;
+		// float maxpthadw = 0;
+		// TLorentzVector hadw;
+                // for (size_t j = 0 ; j != _jets.size(); j++) {		  
+		//   if(jet_types[j] == 11){
+		//     ptlepb = _jets[j].Pt();
+		//     st += _jets[j].Pt();
+		//   }
+		//   else if(jet_types[j] == 12){
+		//     pthadb = _jets[j].Pt();
+		//     st += _jets[j].Pt();
+		//   }
+		//   else if(jet_types[j] == 13 || jet_types[j] == 14){
+		//     if (_jets[j].Pt() > maxpthadw) maxpthadw = _jets[j].Pt();
+		//     st += _jets[j].Pt();
+		//     hadw += _jets[j];
+		//   }
+		//   fev.add_jet(_JetTranslator(_jets[j],jet_types[j],_jetObjRes));
+		// }
+		// float mhadw = hadw.M();
+		// if (st < 1000) continue;
+		// if (ptlepb < 100) continue;
+		// if (pthadb < 200) continue;
+		// if (maxpthadw < 100) continue;
+		// if (mhadw < 60 || mhadw > 100) continue;
 
                 // Clone fev (intended to be fitted event)
                 // to ufev (intended to be unfitted event)
@@ -495,7 +557,7 @@ public:
                                                     sigmt,
                                                     pullx,
                                                     pully);
-                // Store output of the fit
+               // Store output of the fit
                 _Fit_Results.push_back(Fit_Result(chisq,
                                                   fev,
                                                   pullx,
@@ -506,7 +568,6 @@ public:
                                                   sigmt));
 
             } // end loop over two neutrino solution
-
         } while (std::next_permutation (jet_types.begin(), jet_types.end()));
         // end loop over all jet permutations
 

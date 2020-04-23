@@ -23,7 +23,7 @@
 #include "TopQuarkAnalysis/TopHitFit/interface/LeptonTranslatorBase.h"
 #include "TopQuarkAnalysis/TopHitFit/interface/JetTranslatorBase.h"
 #include "TopQuarkAnalysis/TopHitFit/interface/METTranslatorBase.h"
-
+/*
 namespace hitfit {
 
 template<>
@@ -66,8 +66,8 @@ LeptonTranslatorBase<CLHEP::HepLorentzVector>::~LeptonTranslatorBase()
 template<>
 Lepjets_Event_Lep
 LeptonTranslatorBase<CLHEP::HepLorentzVector>::operator()(const CLHEP::HepLorentzVector& lepton,
-                                                          int type /* = hitfit::lepton_label */,
-                                                          bool useObjEmbRes /* = false */)
+                                                          int type,// 
+                                                          bool useObjEmbRes ) //useObjEmbRes = false
 {
 
     Fourvec p(lepton.px(),lepton.py(),lepton.pz(),lepton.e());
@@ -151,8 +151,8 @@ JetTranslatorBase<CLHEP::HepLorentzVector>::~JetTranslatorBase()
 template<>
 Lepjets_Event_Jet
 JetTranslatorBase<CLHEP::HepLorentzVector>::operator()(const CLHEP::HepLorentzVector& jet,
-                                                       int type /* = hitfit::unknown_label */,
-                                                       bool useObjEmbRes /* = false */)
+                                                       int type,// = hitfit::unknown_label
+                                                       bool useObjEmbRes ) //useObjEmbRes = false
 {
 
     Fourvec p(jet.px(),jet.py(),jet.pz(),jet.e());
@@ -224,7 +224,7 @@ METTranslatorBase<CLHEP::HepLorentzVector>::~METTranslatorBase()
 template<>
 Fourvec
 METTranslatorBase<CLHEP::HepLorentzVector>::operator()(const CLHEP::HepLorentzVector& m,
-                                                       bool useObjEmbRes /* = false */)
+                                                       bool useObjEmbRes ) //useObjEmbRes = false
 {
 
     return Fourvec (m.px(),m.py(),0.0,m.e());
@@ -236,7 +236,7 @@ METTranslatorBase<CLHEP::HepLorentzVector>::operator()(const CLHEP::HepLorentzVe
 template<>
 Resolution
 METTranslatorBase<CLHEP::HepLorentzVector>::KtResolution(const CLHEP::HepLorentzVector& m,
-                                                         bool useObjEmbRes /* = false */) const
+                                                         bool useObjEmbRes ) const //useObjEmbRes = false
 {
     return resolution_;
 } // Resolution METTranslatorBase<CLHEP::HepLorentzVector>::KtResolution(const CLHEP::HepLorentzVector& m)
@@ -246,10 +246,11 @@ METTranslatorBase<CLHEP::HepLorentzVector>::KtResolution(const CLHEP::HepLorentz
 template<>
 Resolution
 METTranslatorBase<CLHEP::HepLorentzVector>::METResolution(const CLHEP::HepLorentzVector& m,
-                                                          bool useObjEmbRes /* = false */) const
+                                                          bool useObjEmbRes ) const //useObjEmbRes = false
 {
     return KtResolution(m,useObjEmbRes);
 } // Resolution METTranslatorBase<CLHEP::HepLorentzVector>::METResolution(const CLHEP::HepLorentzVector& m)
 
 
 } // namespace hitfit
+*/

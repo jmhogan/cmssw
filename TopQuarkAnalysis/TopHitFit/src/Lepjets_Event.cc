@@ -404,6 +404,7 @@ void Lepjets_Event::add_jet (const Lepjets_Event_Jet& jet)
 //   jet -         The jet to add.
 //
 {
+  //std::cout << "Checking: jet pt = " << jet.p().perp() << ", eta = " << jet.p().eta() << std::endl;
   _jets.push_back (jet);
 }
 

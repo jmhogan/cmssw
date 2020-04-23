@@ -16,7 +16,7 @@
  */
 
 
-#include "TopQuarkAnalysis/TopHitFit/interface/METTranslatorBase.h"
+#include "../interface/METTranslatorBase.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
 
 #include <cmath>
@@ -24,15 +24,15 @@
 namespace hitfit {
 
 
-template<>
-METTranslatorBase<pat::MET>::METTranslatorBase()
+//template<>
+METTranslatorBase::METTranslatorBase()  //Changed
 {
     resolution_ = Resolution(std::string("0,0,12"));
 } // METTranslatorBase<pat::MET>::METTranslatorBase()
 
 
-template<>
-METTranslatorBase<pat::MET>::METTranslatorBase(const std::string& ifile)
+//template<>
+METTranslatorBase::METTranslatorBase(const std::string& ifile) //Changed
 {
     const Defaults_Text defs(ifile);
     std::string resolution_string(defs.get_string("met_resolution"));
@@ -41,29 +41,40 @@ METTranslatorBase<pat::MET>::METTranslatorBase(const std::string& ifile)
 } // METTranslatorBase<pat::MET>::METTranslatorBase(const std::string& ifile)
 
 
-template<>
-METTranslatorBase<pat::MET>::~METTranslatorBase()
+//template<>
+METTranslatorBase::~METTranslatorBase() //changed
 {
 } // METTranslatorBase<pat::MET>::~METTranslatorBase()
 
 
-template<>
+//template<>
 Fourvec
-METTranslatorBase<pat::MET>::operator()(const pat::MET& m,
+METTranslatorBase::operator()(double metPx, double metPy, //Changed----
                                         bool useObjEmbRes /* = false */)
 {
-    double px = m.px();
-    double py = m.py();
+    double px = metPx;
+    double py = metPy;
+
+    return Fourvec (px,py,0.0,sqrt(px*px + py*py));
+
+} // Fourvec METTranslatorBase<pat::MET>::operator()(const pat::MET& m)
+
+//template<>
+Fourvec
+METTranslatorBase::operator()(double metPx, double metPy, double metEnergy, //Changed----
+                                        bool useObjEmbRes /* = false */)
+{
+    double px = metPx;
+    double py = metPy;
 
     return Fourvec (px,py,0.0,sqrt(px*px + py*py));
 
 } // Fourvec METTranslatorBase<pat::MET>::operator()(const pat::MET& m)
 
 
-
-template<>
+//template<>
 Resolution
-METTranslatorBase<pat::MET>::KtResolution(const pat::MET& m,
+METTranslatorBase::KtResolution(double metPx, double metPy,//Changed-----
                                           bool useObjEmbRes /* = false */) const
 {
     return resolution_;
@@ -71,12 +82,12 @@ METTranslatorBase<pat::MET>::KtResolution(const pat::MET& m,
 
 
 
-template<>
+//template<>
 Resolution
-METTranslatorBase<pat::MET>::METResolution(const pat::MET& m,
+METTranslatorBase::METResolution(double metPx, double metPy, //Changed-----
                                            bool useObjEmbRes /* = false */) const
 {
-    return KtResolution(m,useObjEmbRes);
+    return KtResolution(metPx,metPy,useObjEmbRes);
 } // Resolution METTranslatorBase<pat::MET>::METResolution(const pat::MET& m)
 
 

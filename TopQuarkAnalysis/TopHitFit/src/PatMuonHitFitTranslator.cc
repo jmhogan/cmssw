@@ -3,38 +3,32 @@
 /**
     @file PatMuonHitFitTranslator.cc
 
-    @brief Specialization of template class LeptonTranslatorBase in the
+    @brief Specialization of template class MuonTranslatorBase in the
     package HitFit for pat::Muon.
 
-    @author Haryo Sumowidagdo <Suharyo.Sumowidagdo@cern.ch>
-
-    @par Created
-    Sat Jun 27 17:49:15 2009 UTC
-
-    @version $Id: PatMuonHitFitTranslator.cc,v 1.8 2010/08/06 22:03:03 haryo Exp $
  */
 
 
-#include "TopQuarkAnalysis/TopHitFit/interface/LeptonTranslatorBase.h"
+#include "../interface/MuonTranslatorBase.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 
 namespace hitfit {
 
 
-template<>
-LeptonTranslatorBase<pat::Muon>::LeptonTranslatorBase()
+//template<>
+MuonTranslatorBase::MuonTranslatorBase()  //Changed
 {
 
     std::string CMSSW_BASE(getenv("CMSSW_BASE"));
     std::string resolution_filename = CMSSW_BASE +
-        std::string("/src/TopQuarkAnalysis/PatHitFit/data/exampleMuonResolution.txt");
+        std::string("/src/TopQuarkAnalysis/TopHitFit/data/resolution/tqafMuonResolution.txt");
     resolution_ = EtaDepResolution(resolution_filename);
 
 } // LeptonTranslatorBase<pat::Muon>::LeptonTranslatorBase()
 
 
-template<>
-LeptonTranslatorBase<pat::Muon>::LeptonTranslatorBase(const std::string& ifile)
+//template<>
+MuonTranslatorBase::MuonTranslatorBase(const std::string& ifile)  //Changed
 {
 
     std::string CMSSW_BASE(getenv("CMSSW_BASE"));
@@ -52,22 +46,22 @@ LeptonTranslatorBase<pat::Muon>::LeptonTranslatorBase(const std::string& ifile)
 } // LeptonTranslatorBase<pat::Muon>::LeptonTranslatorBase(const std::string& s)
 
 
-template<>
-LeptonTranslatorBase<pat::Muon>::~LeptonTranslatorBase()
+//template<>
+MuonTranslatorBase::~MuonTranslatorBase()  //Changed
 {
 } // LeptonTranslatorBase<pat::Muon>::~LeptonTranslatorBase()
 
 
-template<>
+//template<>
 Lepjets_Event_Lep
-LeptonTranslatorBase<pat::Muon>::operator()(const pat::Muon& lepton,
+MuonTranslatorBase::operator()(TLorentzVector lepton, //Changed-------
                                             int type /*= hitfit::lepton_label */,
                                             bool useObjEmbRes /* = false */)
 {
 
-    Fourvec p(lepton.px(),lepton.py(),lepton.pz(),lepton.energy());
+    Fourvec p(lepton.Px(),lepton.Py(),lepton.Pz(),lepton.Energy());
 
-    double            muon_eta        = lepton.eta();
+    double            muon_eta        = lepton.Eta();
     Vector_Resolution muon_resolution = resolution_.GetResolution(muon_eta);
 
     Lepjets_Event_Lep muon(p,
@@ -75,22 +69,22 @@ LeptonTranslatorBase<pat::Muon>::operator()(const pat::Muon& lepton,
                            muon_resolution);
     return muon;
 
-} // Lepjets_Event_Lep LeptonTranslatorBase<pat::Muon>::operator()
+} 
 
 
-template<>
+//template<>
 const EtaDepResolution&
-LeptonTranslatorBase<pat::Muon>::resolution() const
+MuonTranslatorBase::resolution() const   //Changed------
 {
     return resolution_;
 }
 
 
-template<>
+//template<>
 bool
-LeptonTranslatorBase<pat::Muon>::CheckEta(const pat::Muon& lepton) const
+MuonTranslatorBase::CheckEta(TLorentzVector lepton) const //Changed---
 {
-    return resolution_.CheckEta(lepton.eta());
+    return resolution_.CheckEta(lepton.Eta());
 }
 
 

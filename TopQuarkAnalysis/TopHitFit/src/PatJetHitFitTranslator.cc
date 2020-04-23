@@ -13,20 +13,22 @@
  */
 
 
-#include <TopQuarkAnalysis/TopHitFit/interface/JetTranslatorBase.h>
+#include "../interface/JetTranslatorBase.h"
 #include <DataFormats/PatCandidates/interface/Jet.h>
 
 namespace hitfit {
 
 
-template<>
-JetTranslatorBase<pat::Jet>::JetTranslatorBase()
+//template<>
+JetTranslatorBase::JetTranslatorBase() //Changed--------------
 {
 
     std::string CMSSW_BASE(getenv("CMSSW_BASE"));
     std::string resolution_filename = CMSSW_BASE +
-        std::string("/src/TopQuarkAnalysis/PatHitFit/data/exampleJetResolution.txt");
+        std::string("/src/TopQuarkAnalysis/TopHitFit/data/resolution/tqafUdscJetResolution.txt");
     udscResolution_ = EtaDepResolution(resolution_filename);
+    resolution_filename = CMSSW_BASE +
+        std::string("/src/TopQuarkAnalysis/TopHitFit/data/resolution/tqafBJetResolution.txt");
     bResolution_    = EtaDepResolution(resolution_filename);
     jetCorrectionLevel_ = "L7Parton";
     jes_            = 1.0;
@@ -35,8 +37,8 @@ JetTranslatorBase<pat::Jet>::JetTranslatorBase()
 } // JetTranslatorBase<pat::Jet>::JetTranslatorBase()
 
 
-template<>
-JetTranslatorBase<pat::Jet>::JetTranslatorBase(const std::string& udscFile,
+//template<>
+JetTranslatorBase::JetTranslatorBase(const std::string& udscFile, //Changed
                                                const std::string& bFile)
 {
 
@@ -67,8 +69,8 @@ JetTranslatorBase<pat::Jet>::JetTranslatorBase(const std::string& udscFile,
 } // JetTranslatorBase<pat::Jet>::JetTranslatorBase(const std::string& ifile)
 
 
-template<>
-JetTranslatorBase<pat::Jet>::JetTranslatorBase(const std::string& udscFile,
+//template<>
+JetTranslatorBase::JetTranslatorBase(const std::string& udscFile, //Changed
                                                const std::string& bFile,
                                                const std::string& jetCorrectionLevel,
                                                double jes,
@@ -102,43 +104,45 @@ JetTranslatorBase<pat::Jet>::JetTranslatorBase(const std::string& udscFile,
 } // JetTranslatorBase<pat::Jet>::JetTranslatorBase(const std::string& ifile)
 
 
-template<>
-JetTranslatorBase<pat::Jet>::~JetTranslatorBase()
+//template<>
+JetTranslatorBase::~JetTranslatorBase() //Changed-----------------
 {
 } // JetTranslatorBase<pat::Jet>::~JetTranslatorBase()
 
 
-template<>
+//template<>
 Lepjets_Event_Jet
-JetTranslatorBase<pat::Jet>::operator()(const pat::Jet& jet,
+JetTranslatorBase::operator()(TLorentzVector jet,  //Changed----------------
                                         int type /*= hitfit::unknown_label */,
                                         bool useObjEmbRes /* = false */)
 {
 
     Fourvec p;
 
-    double            jet_eta        = jet.eta();
+    double            jet_eta        = jet.Eta();
 
-    if (jet.isCaloJet()) {
+/*    if (jet.isCaloJet()) {
         jet_eta = ((reco::CaloJet*) jet.originalObject())->detectorP4().eta();
     }
     if (jet.isPFJet()) {
         // do nothing at the moment!
     }
-
+*/
     Vector_Resolution jet_resolution;
-
+    
     if (type == hitfit::hadb_label || type == hitfit::lepb_label || type == hitfit::higgs_label) {
         jet_resolution = bResolution_.GetResolution(jet_eta);
-        pat::Jet bPartonCorrJet(jet.correctedJet(jetCorrectionLevel_,"BOTTOM"));
-        bPartonCorrJet.scaleEnergy(jesB_);
-        p = Fourvec(bPartonCorrJet.px(),bPartonCorrJet.py(),bPartonCorrJet.pz(),bPartonCorrJet.energy());
+//        pat::Jet bPartonCorrJet(jet.correctedJet(jetCorrectionLevel_,"BOTTOM"));
+//        bPartonCorrJet.scaleEnergy(jesB_);
+//        p = Fourvec(bPartonCorrJet.px(),bPartonCorrJet.py(),bPartonCorrJet.pz(),bPartonCorrJet.energy());
+        p=Fourvec(jet.Px(),jet.Py(),jet.Pz(), jet.Energy());
 
     } else {
         jet_resolution = udscResolution_.GetResolution(jet_eta);
-        pat::Jet udsPartonCorrJet(jet.correctedJet(jetCorrectionLevel_,"UDS"));
-        udsPartonCorrJet.scaleEnergy(jes_);
-        p = Fourvec(udsPartonCorrJet.px(),udsPartonCorrJet.py(),udsPartonCorrJet.pz(),udsPartonCorrJet.energy());
+//        pat::Jet udsPartonCorrJet(jet.correctedJet(jetCorrectionLevel_,"UDS"));
+//        udsPartonCorrJet.scaleEnergy(jes_);
+//        p = Fourvec(udsPartonCorrJet.px(),udsPartonCorrJet.py(),udsPartonCorrJet.pz(),udsPartonCorrJet.energy());
+        p=Fourvec(jet.Px(),jet.Py(),jet.Pz(),jet.Energy());
     }
 
 
@@ -151,34 +155,35 @@ JetTranslatorBase<pat::Jet>::operator()(const pat::Jet& jet,
 } // Lepjets_Event_Jet JetTranslatorBase<pat::Jet>::operator()(const pat::Jet& j,int type)
 
 
-template<>
+//template<>
 const EtaDepResolution&
-JetTranslatorBase<pat::Jet>::udscResolution() const
+JetTranslatorBase::udscResolution() const //Changed---------------------------
 {
     return udscResolution_;
 }
 
 
-template<>
+//template<>
 const EtaDepResolution&
-JetTranslatorBase<pat::Jet>::bResolution() const
+JetTranslatorBase::bResolution() const  //Changed------------------------------
 {
     return bResolution_;
 }
 
 
-template<>
+//template<>
 bool
-JetTranslatorBase<pat::Jet>::CheckEta(const pat::Jet& jet) const
+JetTranslatorBase::CheckEta(TLorentzVector jet) const  //Changed---------------
 {
-    double            jet_eta        = jet.eta();
+    double            jet_eta        = jet.Eta();
 
-    if (jet.isCaloJet()) {
+/*    if (jet.isCaloJet()) {
         jet_eta = ((reco::CaloJet*) jet.originalObject())->detectorP4().eta();
     }
     if (jet.isPFJet()) {
         // do nothing at the moment!
     }
+*/
     return bResolution_.CheckEta(jet_eta) && udscResolution_.CheckEta(jet_eta);
 }
 

@@ -23,9 +23,12 @@
 
 #ifndef HitFit_METTranslatorBase_h
 #define HitFit_METTranslatorBase_h
-
-#include "TopQuarkAnalysis/TopHitFit/interface/EtaDepResolution.h"
-#include "TopQuarkAnalysis/TopHitFit/interface/fourvec.h"
+/*
+#include "CopyOfHitFit/interface/EtaDepResolution.h"
+#include "CopyOfHitFit/interface/fourvec.h"
+*/
+#include "EtaDepResolution.h"
+#include "fourvec.h"
 
 namespace hitfit{
 
@@ -46,7 +49,7 @@ namespace hitfit{
        object class be translated into HitFit's Fourvec.
 
      */
-    template <class AMet>
+//    template <> //Changed--------------
     class METTranslatorBase {
 
     public:
@@ -70,17 +73,39 @@ namespace hitfit{
         ~METTranslatorBase();
 
         /**
-           @brief Convert a missing transverse energy object of type AMet
+           @brief Convert a missing transverse energy object
            into HitFit four-momentum object of type Fourvec.
 
-           @param met The missing transverse energy object to be translated.
+           @param metPx The missing px transverse energy object to be translated.
+
+           @param metPy The missing py transverse energy object to be translated.
 
            @param useObjEmbRes Boolean parameter to indicate if the
            user would like to use the resolution embedded in the object,
            and not the resolution read when instantiating the class.
          */
-        Fourvec operator() (const AMet& met,
+        Fourvec operator() (double  metPx, double metPy,//Changed------
                             bool useObjEmbRes = false);
+
+
+        /**
+ *        @brief Convert a missing transverse energy object
+ *        into HitFit four-momentum object of type Fourvec.
+i*
+ *        @param metPx The missing px transverse energy object to be translated.
+ *
+ *        @param metPy The missing py transverse energy object to be translated.
+ *
+ *        @param useObjEmbRes Boolean parameter to indicate if the
+ *        user would like to use the resolution embedded in the object,
+ *        and not the resolution read when instantiating the class.
+ *      */
+        Fourvec operator() (double  metPx, double metPy, double metEnergy,//Changed------
+                            bool useObjEmbRes = false);
+
+
+
+
 
         /**
            @brief Return the  \f$ k_{T} \f$  resolution corresponding to
@@ -93,7 +118,7 @@ namespace hitfit{
            user would like to use the resolution embedded in the object,
            and not the resolution read when instantiating the class.
          */
-        Resolution KtResolution(const AMet& met,
+        Resolution KtResolution(double metPx, double metPy,//Changed-----
                                 bool useObjEmbRes = false) const;
 
         /**
@@ -106,7 +131,7 @@ namespace hitfit{
            user would like to use the resolution embedded in the object,
            and not the resolution read when instantiating the class.
          */
-        Resolution METResolution(const AMet& met,
+        Resolution METResolution(double metPx, double metPy,//Changed----
                                  bool useObjEmbRes = false) const;
 
 

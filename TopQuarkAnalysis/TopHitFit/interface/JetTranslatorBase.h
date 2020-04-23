@@ -1,10 +1,12 @@
 //
-//
+//Copy Of TranslatorBase.h --> Changed to take in TLorentzVector and 
+// translate to HitFit's Lepjets_Event_Jet object
+// All lines with changes will have //Changed------------ after them
 
 /**
     @file JetTranslatorBase.h
 
-    @brief Template class of function object to translate jet physics
+    @brief Template class of function object to translate TLorentzVector
     object to HitFit's Lepjets_Event_Jet object.
 
     @author Haryo Sumowidagdo <Suharyo.Sumowidagdo@cern.ch>
@@ -18,10 +20,15 @@
 
 #ifndef HitFit_JetTranslatorBase_h
 #define HitFit_JetTranslatorBase_h
-
-#include "TopQuarkAnalysis/TopHitFit/interface/EtaDepResolution.h"
-#include "TopQuarkAnalysis/TopHitFit/interface/Lepjets_Event_Jet.h"
-#include "TopQuarkAnalysis/TopHitFit/interface/fourvec.h"
+/*
+#include "CopyOfHitFit/interface/EtaDepResolution.h"
+#include "CopyOfHitFit/interface/Lepjets_Event_Jet.h"
+#include "CopyOfHitFit/interface/fourvec.h"
+*/
+#include "EtaDepResolution.h"
+#include "Lepjets_Event_Jet.h"
+#include "fourvec.h"
+#include "TLorentzVector.h"
 
 namespace hitfit{
 
@@ -41,7 +48,7 @@ namespace hitfit{
        be translated into HitFit's Lepjets_Event_Jet.
 
      */
-    template <class AJet>
+//    template <> //Changed-----------------------------
     class JetTranslatorBase {
 
     public:
@@ -94,7 +101,7 @@ namespace hitfit{
         ~JetTranslatorBase();
 
         /**
-           @brief Convert a jet physics object of type AJet into
+           @brief Convert a jet physics object of type TLorentzVector into
            HitFit jet physics object of type Lepjets_Event_Jet.
            This operator must be able to apply the appropriate jet
            energy correction in accord with the type of the jet.
@@ -108,7 +115,7 @@ namespace hitfit{
            user would like to use the resolution embedded in the object,
            and not the resolution read when instantiating the class.
          */
-        Lepjets_Event_Jet operator()(const AJet& jet,
+        Lepjets_Event_Jet operator()(TLorentzVector jet, //Changed---------------- 
                                      int type = hitfit::unknown_label,
                                      bool useObjEmbRes = false);
 
@@ -130,7 +137,7 @@ namespace hitfit{
 
            @param jet The jet whose  \f$ \eta \f$  value is to be checked.
          */
-        bool CheckEta(const AJet& jet) const;
+        bool CheckEta(TLorentzVector jet) const; //Changed------------------------ 
 
 
     private:

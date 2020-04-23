@@ -4,37 +4,32 @@
 /**
     @file PatElectronHitFitTranslator.cc
 
-    @brief Specialization of template class LeptonTranslatorBase in the
-    package HitFit for pat::Electron.
+    @brief Specialization of template class ElectronTranslatorBase in the
+    package HitFit for TLorentzVector.
 
-    @author Haryo Sumowidagdo <Suharyo.Sumowidagdo@cern.ch>
 
-    @par Created
-    Sat Jun 27 17:49:06 2009 UTC
-
-    @version $Id: PatElectronHitFitTranslator.cc,v 1.8 2010/08/06 22:02:52 haryo Exp $
  */
 
 
-#include "TopQuarkAnalysis/TopHitFit/interface/LeptonTranslatorBase.h"
+#include "../interface/ElectronTranslatorBase.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 
 namespace hitfit {
 
-template<>
-LeptonTranslatorBase<pat::Electron>::LeptonTranslatorBase()
+//template<>
+ElectronTranslatorBase::ElectronTranslatorBase() //Changed
 {
 
     std::string CMSSW_BASE(getenv("CMSSW_BASE"));
     std::string resolution_filename = CMSSW_BASE +
-        std::string("/src/TopQuarkAnalysis/PatHitFit/data/exampleElectronResolution.txt");
+        std::string("/src/TopQuarkAnalysis/TopHitFit/data/resolution/tqafElectronResolution.txt");
     resolution_ = EtaDepResolution(resolution_filename);
 
-} // LeptonTranslatorBase<pat::Electron>::LeptonTranslatorBase()
+} 
 
 
-template<>
-LeptonTranslatorBase<pat::Electron>::LeptonTranslatorBase(const std::string& ifile)
+//template<>
+ElectronTranslatorBase::ElectronTranslatorBase(const std::string& ifile)  //Changed
 {
 
     std::string CMSSW_BASE(getenv("CMSSW_BASE"));
@@ -49,25 +44,24 @@ LeptonTranslatorBase<pat::Electron>::LeptonTranslatorBase(const std::string& ifi
 
     resolution_ = EtaDepResolution(resolution_filename);
 
-} // LeptonTranslatorBase<pat::Electron>::LeptonTranslatorBase(const std::string& ifile)
+} // ElectronTranslatorBase<pat::Electron>::ElectronTranslatorBase(const std::string& ifile)
 
 
-template<>
-LeptonTranslatorBase<pat::Electron>::~LeptonTranslatorBase()
+//template<>
+ElectronTranslatorBase::~ElectronTranslatorBase()  //Changed
 {
 }
 
 
-template<>
+//template<>
 Lepjets_Event_Lep
-LeptonTranslatorBase<pat::Electron>::operator()(const pat::Electron& lepton,
-                                                int type /* = hitfit::lepton_label */,
-                                                bool useObjEmbRes /* = false */)
+ElectronTranslatorBase::operator()(TLorentzVector lepton, //Changed------
+                                                int type /*= hitfit::lepton_label*/,
+                                                bool useObjEmbRes /* = false */ )
 {
+    Fourvec p(lepton.Px(),lepton.Py(),lepton.Pz(),lepton.Energy());
 
-    Fourvec p(lepton.px(),lepton.py(),lepton.pz(),lepton.energy());
-
-    double            electron_eta        = lepton.superCluster()->eta();
+    double            electron_eta        = lepton.Eta();
     Vector_Resolution electron_resolution = resolution_.GetResolution(electron_eta);
 
     Lepjets_Event_Lep electron(p,
@@ -75,22 +69,22 @@ LeptonTranslatorBase<pat::Electron>::operator()(const pat::Electron& lepton,
                                electron_resolution);
     return electron;
 
-} // Lepjets_Event_Lep LeptonTranslatorBase<pat::Electron>::operator()
+} 
 
 
-template<>
+//template<>
 const EtaDepResolution&
-LeptonTranslatorBase<pat::Electron>::resolution() const
+ElectronTranslatorBase::resolution() const //Changed
 {
     return resolution_;
 }
 
 
-template<>
+//template<>
 bool
-LeptonTranslatorBase<pat::Electron>::CheckEta(const pat::Electron& lepton) const
+ElectronTranslatorBase::CheckEta(TLorentzVector lepton) const  //Changed------
 {
-    double            electron_eta        = lepton.superCluster()->eta();
+    double            electron_eta        = lepton.Eta();
     return resolution_.CheckEta(electron_eta);
 }
 

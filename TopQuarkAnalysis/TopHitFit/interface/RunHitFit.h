@@ -20,16 +20,6 @@
 #define HITFIT_RUNHITFIT_H
 
 #include <algorithm>
-/*
-#include "CopyOfHitFit/interface/Defaults_Text.h"
-#include "CopyOfHitFit/interface/LeptonTranslatorBase.h"
-#include "CopyOfHitFit/interface/JetTranslatorBase.h"
-#include "CopyOfHitFit/interface/METTranslatorBase.h"
-#include "CopyOfHitFit/interface/Fit_Result.h"
-#include "CopyOfHitFit/interface/Lepjets_Event.h"
-#include "CopyOfHitFit/interface/Top_Fit.h"
-*/
-// Changed include statements
 #include "Defaults_Text.h"
 #include "ElectronTranslatorBase.h"
 #include "MuonTranslatorBase.h"
@@ -223,6 +213,12 @@ private:
      */
     std::vector<TLorentzVector>                   _jets;  //Changed
 
+    /** 
+      Array of ints (0 or 1) that tell whether the given jet is a 
+      subjet
+    */
+    std::vector<int>				_isSubJet; //Added
+
     /**
        Boolean flag which sets whether to use jet resolution
        read from file or jet resolution embedded in the physics objects.
@@ -248,6 +244,17 @@ private:
        The results of the kinematic fit.
      */
     std::vector<Fit_Result>             _Fit_Results;
+
+    /**
+       Contraints on the permutations based on unfitted kinematics.
+    */
+    bool _hadwFromSubjets;
+    float _maxpthadwCut;
+    float _stCut;
+    float _ptlepbCut;
+    float _pthadbCut;
+    float _mhadwMin;
+    float _mhadwMax;
 
 public:
 
@@ -287,15 +294,22 @@ public:
               double                        lepw_mass,
               double                        hadw_mass,
               double                        top_mass):
-//Not sure I need these
-        _ElectronTranslator(),
-        _MuonTranslator(),
-        _JetTranslator(),
-        _METTranslator(),
-
-        _event(0,0),
-        _jetObjRes(false),
-        _Top_Fit(Top_Fit_Args(Defaults_Text(default_file)),lepw_mass,hadw_mass,top_mass)
+    //Not sure I need these
+    _ElectronTranslator(),
+      _MuonTranslator(),
+      _JetTranslator(),
+      _METTranslator(),
+      
+      _event(0,0),
+      _jetObjRes(false),
+      _Top_Fit(Top_Fit_Args(Defaults_Text(default_file)),lepw_mass,hadw_mass,top_mass),
+      _hadwFromSubjets(false),
+      _maxpthadwCut(-1),
+      _stCut(-1),
+      _ptlepbCut(-1),
+      _pthadbCut(-1),
+      _mhadwMin(-1),
+      _mhadwMax(1e9)
     {
     }
 
@@ -314,9 +328,24 @@ public:
     {
         _event = Lepjets_Event(0,0);
         _jets.clear();
+	_isSubJet.clear();
         _jetObjRes = false;
         _Unfitted_Events.clear();
         _Fit_Results.clear();
+    }
+
+    /** 
+	@brief Set permutation constraints.
+     */
+    void setPermConstraints(bool useSubjets, float WptCut, float stCut, float lepbCut, float hadbCut, float mWmin, float mWmax)
+    {
+      _hadwFromSubjets = useSubjets;
+      _maxpthadwCut = WptCut;
+      _stCut = stCut;
+      _ptlepbCut = lepbCut;
+      _pthadbCut = hadbCut;
+      _mhadwMin = mWmin;
+      _mhadwMax = mWmax;
     }
 
     /**
@@ -378,7 +407,7 @@ public:
        and not the resolution read when instantiating the class.
     */
     void
-    AddJet(TLorentzVector jet, bool useObjRes = false) //Changed------------
+    AddJet(TLorentzVector jet, int isWSubJet, bool useObjRes = false) //Changed------------
     {
         // Only set flag when adding the first jet
         // the additional jets then WILL be treated in the
@@ -389,6 +418,7 @@ public:
 
         if (_jets.size() < MAX_HITFIT_JET) {
             _jets.push_back(jet);
+            _isSubJet.push_back(isWSubJet);
         }
         return;
     }
@@ -493,41 +523,42 @@ public:
                 // return object of Lepjets_Event_Jet with
                 // jet energy correction applied in accord with
                 // the assumed jet type (b or light).
+
+	        float st = _event.lep(0).p().perp() + _event.met().perp();
+		float ptlepb = 0;
+		float pthadb = 0;
+		float maxpthadw = 0;
+		TLorentzVector hadw;
+		bool incorrectSubJetAssignment=false;
                 for (size_t j = 0 ; j != _jets.size(); j++) {		  
+		  if(jet_types[j] == 11){
+		    if(_isSubJet[j]>0){incorrectSubJetAssignment=true;}
+		    ptlepb = _jets[j].Pt();
+		    st += _jets[j].Pt();
+		  }
+		  else if(jet_types[j] == 12){
+		    if(_isSubJet[j]>0){incorrectSubJetAssignment=true;}
+		    pthadb = _jets[j].Pt();
+		    st += _jets[j].Pt();
+		  }
+		  else if(jet_types[j] == 13 || jet_types[j] == 14){
+		    if (_jets[j].Pt() > maxpthadw) maxpthadw = _jets[j].Pt();
+		    st += _jets[j].Pt();
+		    hadw += _jets[j];
+		  }
+		  else{
+		    if(_isSubJet[j]>0){incorrectSubJetAssignment=true;}
+		  }
 		  fev.add_jet(_JetTranslator(_jets[j],jet_types[j],_jetObjRes));
 		}
-
-		// ----------------------------------------------------------
-		// EXAMPLE: how to cut out permutations based on kinetmatics
-		//          **COMMENT** the for loop just above to use this!
-		// ----------------------------------------------------------
-	        // float st = 0;
-		// float ptlepb = 0;
-		// float pthadb = 0;
-		// float maxpthadw = 0;
-		// TLorentzVector hadw;
-                // for (size_t j = 0 ; j != _jets.size(); j++) {		  
-		//   if(jet_types[j] == 11){
-		//     ptlepb = _jets[j].Pt();
-		//     st += _jets[j].Pt();
-		//   }
-		//   else if(jet_types[j] == 12){
-		//     pthadb = _jets[j].Pt();
-		//     st += _jets[j].Pt();
-		//   }
-		//   else if(jet_types[j] == 13 || jet_types[j] == 14){
-		//     if (_jets[j].Pt() > maxpthadw) maxpthadw = _jets[j].Pt();
-		//     st += _jets[j].Pt();
-		//     hadw += _jets[j];
-		//   }
-		//   fev.add_jet(_JetTranslator(_jets[j],jet_types[j],_jetObjRes));
-		// }
-		// float mhadw = hadw.M();
-		// if (st < 1000) continue;
-		// if (ptlepb < 100) continue;
-		// if (pthadb < 200) continue;
-		// if (maxpthadw < 100) continue;
-		// if (mhadw < 60 || mhadw > 100) continue;
+		float mhadw = hadw.M();
+		// reject permutations based on the unfitted kinematic criteria
+                if (incorrectSubJetAssignment && _hadwFromSubjets) continue;
+		if (maxpthadw < _maxpthadwCut) continue;
+		if (st < _stCut) continue;
+		if (ptlepb < _ptlepbCut) continue;
+		if (pthadb < _pthadbCut) continue;
+		if (mhadw < _mhadwMin || mhadw > _mhadwMax) continue;
 
                 // Clone fev (intended to be fitted event)
                 // to ufev (intended to be unfitted event)
